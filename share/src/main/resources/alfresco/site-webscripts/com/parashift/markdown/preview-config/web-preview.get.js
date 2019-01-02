@@ -3,30 +3,37 @@ if (model.widgets)
     for (var i = 0; i < model.widgets.length; i++)
     {
         var widget = model.widgets[i];
-        if (widget.id == "WebPreview" && model.proxy != "alfresco-noauth")
+
+        if (widget.id == "WebPreview")
         {
+            if (url.args.nodeRef) {
+                nodeRef = url.args.nodeRef
+                pObj = eval('(' + remote.call("/slingshot/doclib2/node/" + nodeRef.replace(":/", "")) + ')').item;
+            } else {
+                pObj = JSON.parse(remote.connect(model.proxy).get("/" + model.api + "/node/" + model.nodeRef + "/metadata"))
+                nodeRef = pObj.nodeRef
+            }
 
-            //We need to know some extra bits about the node, such as the repoPath to display images
-            pObj = eval('(' + remote.call("/slingshot/doclib2/node/" + model.nodeRef.replace(":/","")) + ')');
+            mdContent = remote.connect(model.proxy).get("/" + model.api + "/node/" + model.nodeRef + "/content")
 
-            //We check to see if the mime type is markdown, and if so, overwrite the conditions object.
-            if(pObj.item && pObj.item.node && pObj.item.node.mimetype == "text/x-markdown") {
-
+            if(pObj && pObj.mimetype == "text/x-markdown") {
                 var conditions = [{
                     attributes: {
                         mimeType: "text/x-markdown"
                     },
                     plugins: [{
                         name: "MarkDown",
-                        attributes: pObj.item
+                        attributes: pObj
                     }]
                 }];
 
                 // Override the original conditions
-                model.pluginConditions = jsonUtils.toJSONString(conditions);
+                model.pluginConditions = conditions;
+                model.nodeRef = nodeRef;
                 widget.options.pluginConditions = model.pluginConditions;
-
             }
+            widget.options.originUri = nodeRef;
+            widget.options.content = mdContent;
 
         }
     }
