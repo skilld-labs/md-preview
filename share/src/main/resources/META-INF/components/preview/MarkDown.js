@@ -3,6 +3,10 @@
     Alfresco.WebPreview.prototype.Plugins.MarkDown = function(wp, attributes)
     {
         this.wp = wp;
+    if (!attributes.node) {
+        attributes.node = {contentURL: "/slingshot/node/content/" + wp.options.originUri.replace(":/", "") + "/" + wp.options.name}
+        attributes.content = wp.options.content
+    }
         this.attributes = YAHOO.lang.merge(Alfresco.util.deepCopy(this.attributes), attributes);
         return this;
     };
@@ -18,9 +22,7 @@
         display: function() {
 
             var node = this.attributes.node;
-
-            //get the default relative path of the node
-            var locationPath = Alfresco.constants.PROXY_URI_RELATIVE + "/markdown" + this.attributes.location.repoPath + "/";
+            var content = this.attributes.content;
 
             //get the Div Element we'll be putting the Markdown
             var divElem = document.getElementById(this.wp.id + "-body")
@@ -38,13 +40,8 @@
                                 type: 'output',
                                 filter: function(source) {
                                     return source.replace(/<img src="([^"]*)"/g, function(match, src) {
-
                                         if(src.startsWith("http")) {
-                                            //if this includes external links, then don't change it.
                                             return match;
-                                        } else {
-                                            //if it's a relative link, we need to use our webscript
-                                            return "<img src=\"" + locationPath + src + "\"";
                                         }
                                     });
                                 }
@@ -53,18 +50,15 @@
                     ]
 
                 });
-
-
                 request.get(Alfresco.constants.PROXY_URI_RELATIVE + node.contentURL).then(function(mdData) {
-
-
                     newHtml = converter.makeHtml(mdData);
+                    divElem.innerHTML = newHtml;
 
+                }, function(error) {
+                    newHtml = converter.makeHtml(content);
+                    divElem.innerHTML = newHtml;
+        });
                     divElem.className = "markdown-body";
-                    divElem.innerHTML = converter.makeHtml(mdData);
-
-
-                });
 
             });
 

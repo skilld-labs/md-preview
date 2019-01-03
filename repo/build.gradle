@@ -24,7 +24,7 @@ version = "1.1.1"
 
 ext {
     alfresco = [:]
-    alfresco.version = "5.0.1"
+    alfresco.version = "5.0.d"
 }
 
 repositories {
@@ -32,10 +32,10 @@ repositories {
     maven { url "https://maven.alfresco.com/nexus/content/groups/public/" }
 
     maven {
-        credentials {
-            username project['alfresco.repo.private.username']
-            password project['alfresco.repo.private.password']
-        }
+//        credentials {
+//            username project['alfresco.repo.private.username']
+//            password project['alfresco.repo.private.password']
+//        }
 
         url "https://maven.alfresco.com/nexus/content/groups/private/"
     }
