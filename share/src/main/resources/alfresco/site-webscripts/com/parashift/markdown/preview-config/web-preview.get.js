@@ -8,13 +8,13 @@ if (model.widgets)
         {
             if (url.args.nodeRef) {
                 nodeRef = url.args.nodeRef
-                pObj = eval('(' + remote.call("/slingshot/doclib2/node/" + nodeRef.replace(":/", "")) + ')').item;
+                pObj = eval('(' + remote.call("/slingshot/doclib2/node/" + nodeRef.replace(":/", "")) + ')').item.node;
             } else {
                 pObj = JSON.parse(remote.connect(model.proxy).get("/" + model.api + "/node/" + model.nodeRef + "/metadata"))
                 nodeRef = pObj.nodeRef
+                mdContent = remote.connect(model.proxy).get("/" + model.api + "/node/" + model.nodeRef + "/content")
+                widget.options.content = mdContent;
             }
-
-            mdContent = remote.connect(model.proxy).get("/" + model.api + "/node/" + model.nodeRef + "/content")
 
             if(pObj && pObj.mimetype == "text/x-markdown") {
                 var conditions = [{
@@ -33,8 +33,6 @@ if (model.widgets)
                 widget.options.pluginConditions = model.pluginConditions;
             }
             widget.options.originUri = nodeRef;
-            widget.options.content = mdContent;
-
         }
     }
 }
